@@ -17,7 +17,7 @@ import Set exposing (Set)
 
 
 type alias ProjectContext =
-    { imports : List ( ModuleName, List ModuleName )
+    { imports : Dict ModuleName (List ModuleName)
     , dependencyModules : Set ModuleName
     }
 
@@ -30,7 +30,7 @@ type alias ModuleContext =
 
 initContext : ProjectContext
 initContext =
-    { imports = []
+    { imports = Dict.empty
     , dependencyModules = Set.empty
     }
 
@@ -108,13 +108,10 @@ fromModuleToProject =
         (\isInSourceDirectories moduleName moduleContext ->
             { imports =
                 if isInSourceDirectories then
-                    [ ( moduleName
-                      , List.reverse moduleContext.imports
-                      )
-                    ]
+                    Dict.singleton moduleName (List.reverse moduleContext.imports)
 
                 else
-                    []
+                    Dict.empty
             , dependencyModules = moduleContext.dependencyModules
             }
         )
@@ -124,7 +121,7 @@ fromModuleToProject =
 
 foldProjectContexts : ProjectContext -> ProjectContext -> ProjectContext
 foldProjectContexts newContext previousContext =
-    { imports = previousContext.imports ++ newContext.imports
+    { imports = Dict.union newContext.imports previousContext.imports
     , dependencyModules = Set.union newContext.dependencyModules previousContext.dependencyModules
     }
 
@@ -146,20 +143,21 @@ dataExtractor projectContext =
 
         nodes : List String
         nodes =
-            List.filterMap
-                (\( name, imports ) ->
-                    if List.isEmpty imports then
-                        Nothing
+            projectContext.imports
+                |> Dict.toList
+                |> List.filterMap
+                    (\( name, imports ) ->
+                        if List.isEmpty imports then
+                            Nothing
 
-                    else
-                        "  "
-                            ++ toNode name
-                            ++ " -> {"
-                            ++ String.join " " (List.map toNode imports)
-                            ++ "}"
-                            |> Just
-                )
-                projectContext.imports
+                        else
+                            "  "
+                                ++ toNode name
+                                ++ " -> {"
+                                ++ String.join " " (List.map toNode imports)
+                                ++ "}"
+                                |> Just
+                    )
     in
     "digraph {\n" ++ String.join "\n" nodes ++ "\n}"
 
