@@ -16,25 +16,6 @@ import Review.Rule as Rule exposing (Rule)
 import Set exposing (Set)
 
 
-type alias ProjectContext =
-    { imports : Dict ModuleName (List ModuleName)
-    , dependencyModules : Set ModuleName
-    }
-
-
-type alias ModuleContext =
-    { imports : List ModuleName
-    , dependencyModules : Set ModuleName
-    }
-
-
-initContext : ProjectContext
-initContext =
-    { imports = Dict.empty
-    , dependencyModules = Set.empty
-    }
-
-
 {-| Reports... REPLACEME
 
     config =
@@ -81,6 +62,25 @@ rule =
             }
         |> Rule.withDataExtractor (dataExtractor >> Encode.string)
         |> Rule.fromProjectRuleSchema
+
+
+type alias ProjectContext =
+    { imports : Dict ModuleName (List ModuleName)
+    , dependencyModules : Set ModuleName
+    }
+
+
+type alias ModuleContext =
+    { imports : List ModuleName
+    , dependencyModules : Set ModuleName
+    }
+
+
+initContext : ProjectContext
+initContext =
+    { imports = Dict.empty
+    , dependencyModules = Set.empty
+    }
 
 
 dependencyVisitor : Dict String Dependency -> ProjectContext -> ( List never, ProjectContext )
