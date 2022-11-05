@@ -107,7 +107,7 @@ fromModuleToProject =
     Rule.initContextCreator
         (\isInSourceDirectories moduleName moduleContext ->
             { imports =
-                if isInSourceDirectories then
+                if isInSourceDirectories && not (List.isEmpty moduleContext.imports) then
                     Dict.singleton moduleName (List.reverse moduleContext.imports)
 
                 else
@@ -145,18 +145,13 @@ dataExtractor projectContext =
         nodes =
             projectContext.imports
                 |> Dict.toList
-                |> List.filterMap
+                |> List.map
                     (\( name, imports ) ->
-                        if List.isEmpty imports then
-                            Nothing
-
-                        else
-                            "  "
-                                ++ toNode name
-                                ++ " -> {"
-                                ++ String.join " " (List.map toNode imports)
-                                ++ "}"
-                                |> Just
+                        "  "
+                            ++ toNode name
+                            ++ " -> {"
+                            ++ String.join " " (List.map toNode imports)
+                            ++ "}"
                     )
     in
     "digraph {\n" ++ String.join "\n" nodes ++ "\n}"
