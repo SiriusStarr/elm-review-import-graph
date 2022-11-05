@@ -17,7 +17,7 @@ import Set exposing (Set)
 
 
 type alias ProjectContext =
-    { imports : List ( { name : ModuleName, isSourceModule : Bool }, List { name : ModuleName, isSourceModule : Bool } )
+    { imports : List ( ModuleName, List { name : ModuleName, isSourceModule : Bool } )
     , dependencyModules : Set ModuleName
     , nonSourceModules : Set ModuleName
     }
@@ -118,7 +118,7 @@ fromModuleToProject =
         (\isInSourceDirectories moduleContext ->
             { imports =
                 if isInSourceDirectories then
-                    [ ( { name = moduleContext.moduleName, isSourceModule = True }
+                    [ ( moduleContext.moduleName
                       , List.reverse moduleContext.imports
                       )
                     ]
@@ -158,8 +158,8 @@ dataExtractor projectContext =
         nodes : List String
         nodes =
             List.filterMap
-                (\( { name, isSourceModule }, imports ) ->
-                    if List.isEmpty imports || not isSourceModule then
+                (\( name, imports ) ->
+                    if List.isEmpty imports then
                         Nothing
 
                     else
