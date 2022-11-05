@@ -1,7 +1,7 @@
 module ExtractImportGraphTest exposing (all)
 
 import ExtractImportGraph exposing (rule)
-import Review.Project exposing (modules)
+import Json.Encode as Encode
 import Review.Test
 import Test exposing (Test, describe, test)
 
@@ -32,33 +32,8 @@ baz = 1
 """
                 ]
                     |> Review.Test.runOnModules rule
-                    |> Review.Test.expectGlobalErrors
-                        [ importGraph
-                            [ ( [ "A" ]
-                              , [ [ "B" ], [ "C" ] ]
-                              )
-                            , ( [ "B" ]
-                              , [ [ "C" ] ]
-                              )
-                            ]
-                        ]
+                    |> Review.Test.expectDataExtract ("""digraph {
+  "A" -> {"B" "C"}
+  "B" -> {"C"}
+}""" |> Encode.string |> Encode.encode 0)
         ]
-
-
-importGraph : List ( List String, List (List String) ) -> { message : String, details : List String }
-importGraph modules =
-    { message = "Import Graph"
-    , details =
-        "digraph {"
-            :: List.map
-                (\( moduleName, imports ) ->
-                    "\""
-                        ++ String.join "." moduleName
-                        ++ "\""
-                        ++ " -> {"
-                        ++ String.join " " (List.map (\s -> "\"" ++ String.join "." s ++ "\"") imports)
-                        ++ "}"
-                )
-                modules
-            ++ [ "}" ]
-    }

@@ -10,6 +10,7 @@ import Dict exposing (Dict)
 import Elm.Syntax.Import exposing (Import)
 import Elm.Syntax.ModuleName exposing (ModuleName)
 import Elm.Syntax.Node as Node exposing (Node)
+import Json.Encode as Encode
 import Review.Project.Dependency as Dependency exposing (Dependency)
 import Review.Rule as Rule exposing (Rule)
 import Set exposing (Set)
@@ -79,7 +80,7 @@ rule =
             , fromModuleToProject = fromModuleToProject
             , foldProjectContexts = foldProjectContexts
             }
-        |> Rule.withFinalProjectEvaluation finalEvaluationForProject
+        |> Rule.withDataExtractor (dataExtractor >> Encode.string)
         |> Rule.fromProjectRuleSchema
 
 
@@ -142,16 +143,15 @@ moduleVisitor schema =
         |> Rule.withImportVisitor importVisitor
 
 
-finalEvaluationForProject : ProjectContext -> List (Rule.Error { useErrorForModule : () })
-finalEvaluationForProject projectContext =
+dataExtractor : ProjectContext -> String
+dataExtractor projectContext =
     let
         toNode : List String -> String
         toNode mN =
             "\"" ++ String.join "." mN ++ "\""
-    in
-    [ Rule.globalError
-        { message = "Import Graph"
-        , details =
+
+        nodes : List String
+        nodes =
             List.filterMap
                 (\( { name, isSourceModule }, imports ) ->
                     let
@@ -162,16 +162,16 @@ finalEvaluationForProject projectContext =
                         Nothing
 
                     else
-                        toNode name
+                        "  "
+                            ++ toNode name
                             ++ " -> {"
                             ++ String.join " " (List.map (toNode << .name) relevantImports)
                             ++ "}"
                             |> Just
                 )
                 projectContext.imports
-                |> (\es -> "digraph {" :: es ++ [ "}" ])
-        }
-    ]
+    in
+    "digraph {\n" ++ String.join "\n" nodes ++ "\n}"
 
 
 importVisitor : Node Import -> ModuleContext -> ( List never, ModuleContext )
