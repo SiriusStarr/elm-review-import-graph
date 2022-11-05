@@ -17,14 +17,14 @@ import Set exposing (Set)
 
 
 type alias ProjectContext =
-    { imports : List ( ModuleName, List { name : ModuleName, isSourceModule : Bool } )
+    { imports : List ( ModuleName, List ModuleName )
     , dependencyModules : Set ModuleName
     , nonSourceModules : Set ModuleName
     }
 
 
 type alias ModuleContext =
-    { imports : List { name : ModuleName, isSourceModule : Bool }
+    { imports : List ModuleName
     , moduleName : ModuleName
     , dependencyModules : Set ModuleName
     , nonSourceModules : Set ModuleName
@@ -166,7 +166,7 @@ dataExtractor projectContext =
                         "  "
                             ++ toNode name
                             ++ " -> {"
-                            ++ String.join " " (List.map (toNode << .name) imports)
+                            ++ String.join " " (List.map toNode imports)
                             ++ "}"
                             |> Just
                 )
@@ -190,10 +190,6 @@ importVisitor imp context =
     else
         ( []
         , { context
-            | imports =
-                { name = moduleName
-                , isSourceModule = not <| Set.member moduleName context.nonSourceModules
-                }
-                    :: context.imports
+            | imports = moduleName :: context.imports
           }
         )
