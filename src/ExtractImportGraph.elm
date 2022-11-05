@@ -137,10 +137,6 @@ moduleVisitor schema =
 dataExtractor : ProjectContext -> String
 dataExtractor projectContext =
     let
-        toNode : List String -> String
-        toNode mN =
-            "\"" ++ String.join "." mN ++ "\""
-
         nodes : List String
         nodes =
             projectContext.imports
@@ -148,13 +144,18 @@ dataExtractor projectContext =
                 |> List.map
                     (\( name, imports ) ->
                         "  "
-                            ++ toNode name
+                            ++ wrapNameInQuotes name
                             ++ " -> {"
-                            ++ String.join " " (List.map toNode imports)
+                            ++ String.join " " (List.map wrapNameInQuotes imports)
                             ++ "}"
                     )
     in
     "digraph {\n" ++ String.join "\n" nodes ++ "\n}"
+
+
+wrapNameInQuotes : ModuleName -> String
+wrapNameInQuotes mN =
+    "\"" ++ String.join "." mN ++ "\""
 
 
 importVisitor : Node Import -> ModuleContext -> ( List never, ModuleContext )
