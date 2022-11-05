@@ -122,7 +122,7 @@ fromModuleToProject =
 foldProjectContexts : ProjectContext -> ProjectContext -> ProjectContext
 foldProjectContexts newContext previousContext =
     { imports = Dict.union newContext.imports previousContext.imports
-    , dependencyModules = Set.union newContext.dependencyModules previousContext.dependencyModules
+    , dependencyModules = previousContext.dependencyModules
     }
 
 
