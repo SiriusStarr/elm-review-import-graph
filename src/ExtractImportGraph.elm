@@ -19,7 +19,6 @@ import Set exposing (Set)
 type alias ProjectContext =
     { imports : List ( ModuleName, List ModuleName )
     , dependencyModules : Set ModuleName
-    , nonSourceModules : Set ModuleName
     }
 
 
@@ -27,13 +26,14 @@ type alias ModuleContext =
     { imports : List ModuleName
     , moduleName : ModuleName
     , dependencyModules : Set ModuleName
-    , nonSourceModules : Set ModuleName
     }
 
 
 initContext : ProjectContext
 initContext =
-    { imports = [], dependencyModules = Set.empty, nonSourceModules = Set.empty }
+    { imports = []
+    , dependencyModules = Set.empty
+    }
 
 
 {-| Reports... REPLACEME
@@ -96,20 +96,13 @@ dependencyVisitor ds context =
 fromProjectToModule : Rule.ContextCreator ProjectContext ModuleContext
 fromProjectToModule =
     Rule.initContextCreator
-        (\moduleName isSourceFile projectContext ->
+        (\moduleName projectContext ->
             { imports = []
             , dependencyModules = projectContext.dependencyModules
             , moduleName = moduleName
-            , nonSourceModules =
-                if isSourceFile then
-                    projectContext.nonSourceModules
-
-                else
-                    Set.insert moduleName projectContext.nonSourceModules
             }
         )
         |> Rule.withModuleName
-        |> Rule.withIsInSourceDirectories
 
 
 fromModuleToProject : Rule.ContextCreator ModuleContext ProjectContext
@@ -126,7 +119,6 @@ fromModuleToProject =
                 else
                     []
             , dependencyModules = moduleContext.dependencyModules
-            , nonSourceModules = moduleContext.nonSourceModules
             }
         )
         |> Rule.withIsInSourceDirectories
@@ -136,7 +128,6 @@ foldProjectContexts : ProjectContext -> ProjectContext -> ProjectContext
 foldProjectContexts newContext previousContext =
     { imports = previousContext.imports ++ newContext.imports
     , dependencyModules = Set.union newContext.dependencyModules previousContext.dependencyModules
-    , nonSourceModules = Set.union newContext.nonSourceModules previousContext.nonSourceModules
     }
 
 
