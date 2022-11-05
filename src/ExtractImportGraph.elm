@@ -65,7 +65,7 @@ rule =
 
 
 type alias ProjectContext =
-    { imports : Dict ModuleName (List ModuleName)
+    { imports : Dict ModuleName String
     , dependencyModules : Set ModuleName
     }
 
@@ -108,7 +108,11 @@ fromModuleToProject =
         (\isInSourceDirectories moduleName moduleContext ->
             { imports =
                 if isInSourceDirectories && not (List.isEmpty moduleContext.imports) then
-                    Dict.singleton moduleName (List.reverse moduleContext.imports)
+                    moduleContext.imports
+                        |> List.reverse
+                        |> List.map wrapNameInQuotes
+                        |> String.join " "
+                        |> Dict.singleton moduleName
 
                 else
                     Dict.empty
@@ -146,7 +150,7 @@ dataExtractor projectContext =
                         "  "
                             ++ wrapNameInQuotes name
                             ++ " -> {"
-                            ++ String.join " " (List.map wrapNameInQuotes imports)
+                            ++ imports
                             ++ "}"
                     )
     in
