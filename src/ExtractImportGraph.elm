@@ -17,14 +17,14 @@ import Set exposing (Set)
 
 
 type alias ProjectContext =
-    { imports : List ( { name : ModuleName, isSourceModule : Bool }, List { name : ModuleName, isDependency : Bool, isSourceModule : Bool } )
+    { imports : List ( { name : ModuleName, isSourceModule : Bool }, List { name : ModuleName, isSourceModule : Bool } )
     , dependencyModules : Set ModuleName
     , nonSourceModules : Set ModuleName
     }
 
 
 type alias ModuleContext =
-    { imports : List { name : ModuleName, isDependency : Bool, isSourceModule : Bool }
+    { imports : List { name : ModuleName, isSourceModule : Bool }
     , moduleName : ModuleName
     , dependencyModules : Set ModuleName
     , nonSourceModules : Set ModuleName
@@ -154,18 +154,14 @@ dataExtractor projectContext =
         nodes =
             List.filterMap
                 (\( { name, isSourceModule }, imports ) ->
-                    let
-                        relevantImports =
-                            List.filter (not << .isDependency) imports
-                    in
-                    if List.isEmpty relevantImports || not isSourceModule then
+                    if List.isEmpty imports || not isSourceModule then
                         Nothing
 
                     else
                         "  "
                             ++ toNode name
                             ++ " -> {"
-                            ++ String.join " " (List.map (toNode << .name) relevantImports)
+                            ++ String.join " " (List.map (toNode << .name) imports)
                             ++ "}"
                             |> Just
                 )
@@ -176,18 +172,23 @@ dataExtractor projectContext =
 
 importVisitor : Node Import -> ModuleContext -> ( List never, ModuleContext )
 importVisitor imp context =
-    Node.value imp
-        |> .moduleName
-        |> Node.value
-        |> (\n ->
-                ( []
-                , { context
-                    | imports =
-                        { name = n
-                        , isDependency = Set.member n context.dependencyModules
-                        , isSourceModule = not <| Set.member n context.nonSourceModules
-                        }
-                            :: context.imports
-                  }
-                )
-           )
+    let
+        moduleName : ModuleName
+        moduleName =
+            Node.value imp
+                |> .moduleName
+                |> Node.value
+    in
+    if Set.member moduleName context.dependencyModules then
+        ( [], context )
+
+    else
+        ( []
+        , { context
+            | imports =
+                { name = moduleName
+                , isSourceModule = not <| Set.member moduleName context.nonSourceModules
+                }
+                    :: context.imports
+          }
+        )
