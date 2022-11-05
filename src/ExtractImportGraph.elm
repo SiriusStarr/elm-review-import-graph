@@ -24,7 +24,6 @@ type alias ProjectContext =
 
 type alias ModuleContext =
     { imports : List ModuleName
-    , moduleName : ModuleName
     , dependencyModules : Set ModuleName
     }
 
@@ -96,22 +95,20 @@ dependencyVisitor ds context =
 fromProjectToModule : Rule.ContextCreator ProjectContext ModuleContext
 fromProjectToModule =
     Rule.initContextCreator
-        (\moduleName projectContext ->
+        (\projectContext ->
             { imports = []
             , dependencyModules = projectContext.dependencyModules
-            , moduleName = moduleName
             }
         )
-        |> Rule.withModuleName
 
 
 fromModuleToProject : Rule.ContextCreator ModuleContext ProjectContext
 fromModuleToProject =
     Rule.initContextCreator
-        (\isInSourceDirectories moduleContext ->
+        (\isInSourceDirectories moduleName moduleContext ->
             { imports =
                 if isInSourceDirectories then
-                    [ ( moduleContext.moduleName
+                    [ ( moduleName
                       , List.reverse moduleContext.imports
                       )
                     ]
@@ -122,6 +119,7 @@ fromModuleToProject =
             }
         )
         |> Rule.withIsInSourceDirectories
+        |> Rule.withModuleName
 
 
 foldProjectContexts : ProjectContext -> ProjectContext -> ProjectContext
