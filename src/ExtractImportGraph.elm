@@ -115,16 +115,21 @@ fromProjectToModule =
 fromModuleToProject : Rule.ContextCreator ModuleContext ProjectContext
 fromModuleToProject =
     Rule.initContextCreator
-        (\moduleContext ->
+        (\isInSourceDirectories moduleContext ->
             { imports =
-                [ ( { name = moduleContext.moduleName, isSourceModule = not <| Set.member moduleContext.moduleName moduleContext.nonSourceModules }
-                  , List.reverse moduleContext.imports
-                  )
-                ]
+                if isInSourceDirectories then
+                    [ ( { name = moduleContext.moduleName, isSourceModule = True }
+                      , List.reverse moduleContext.imports
+                      )
+                    ]
+
+                else
+                    []
             , dependencyModules = moduleContext.dependencyModules
             , nonSourceModules = moduleContext.nonSourceModules
             }
         )
+        |> Rule.withIsInSourceDirectories
 
 
 foldProjectContexts : ProjectContext -> ProjectContext -> ProjectContext
