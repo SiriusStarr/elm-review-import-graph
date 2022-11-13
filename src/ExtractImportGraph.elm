@@ -78,7 +78,7 @@ rule =
             , fromModuleToProject = fromModuleToProject
             , foldProjectContexts = foldProjectContexts
             }
-        |> Rule.withDataExtractor (dataExtractor >> Encode.string)
+        |> Rule.withDataExtractor dataExtractor
         |> Rule.fromProjectRuleSchema
 
 
@@ -156,7 +156,7 @@ moduleVisitor schema =
         |> Rule.withImportVisitor importVisitor
 
 
-dataExtractor : ProjectContext -> String
+dataExtractor : ProjectContext -> Encode.Value
 dataExtractor projectContext =
     let
         nodes : List String
@@ -171,8 +171,26 @@ dataExtractor projectContext =
                             ++ imports
                             ++ "}"
                     )
+
+        graph : String
+        graph =
+            "digraph {\n" ++ String.join "\n" nodes ++ "\n}"
     in
-    "digraph {\n" ++ String.join "\n" nodes ++ "\n}"
+    Encode.object
+        [ ( "onlineGraph", Encode.string ("https://dreampuf.github.io/GraphvizOnline/#" ++ escapeUrlCharacters graph) )
+        , ( "graph", Encode.string graph )
+        ]
+
+
+escapeUrlCharacters : String -> String
+escapeUrlCharacters graph =
+    graph
+        |> String.replace " " "%20"
+        |> String.replace "\"" "%22"
+        |> String.replace "{" "%7B"
+        |> String.replace "}" "%7D"
+        |> String.replace ">" "%3E"
+        |> String.replace "\n" "%0A"
 
 
 wrapNameInQuotes : ModuleName -> String

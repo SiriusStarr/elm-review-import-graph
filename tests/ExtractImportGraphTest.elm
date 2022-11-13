@@ -32,8 +32,11 @@ baz = 1
 """
                 ]
                     |> Review.Test.runOnModules rule
-                    |> Review.Test.expectDataExtract ("""digraph {
-  "A" -> {"B" "C"}
-  "B" -> {"C"}
-}""" |> Encode.string |> Encode.encode 0)
+                    |> Review.Test.expectDataExtract
+                        (Encode.object
+                            [ ( "onlineGraph", Encode.string "https://dreampuf.github.io/GraphvizOnline/#digraph%20%7B%0A%20%20%22A%22%20-%3E%20%7B%22B%22%20%22C%22%7D%0A%20%20%22B%22%20-%3E%20%7B%22C%22%7D%0A%7D" )
+                            , ( "graph", Encode.string "digraph {\n  \"A\" -> {\"B\" \"C\"}\n  \"B\" -> {\"C\"}\n}" )
+                            ]
+                            |> Encode.encode 0
+                        )
         ]
