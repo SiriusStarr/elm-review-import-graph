@@ -22,7 +22,12 @@ import Set exposing (Set)
         [ ExtractImportGraph.rule
         ]
 
-This will generate a description of a graph like the one below (example from [`rtfeldman/elm-spa-example`](https://github.com/rtfeldman/elm-spa-example)).
+This will generate a JSON with two fields:
+
+  - `graph` - The import graph for your project's modules
+  - `onlineGraph` - A link to [GraphvizOnline](https://dreampuf.github.io/GraphvizOnline/) where you can directly view your graph (might not work if your project is too big though)
+
+The import graph will look like the one below (example for [`rtfeldman/elm-spa-example`](https://github.com/rtfeldman/elm-spa-example)).
 
     digraph {
       "Api" -> {"Api.Endpoint" "Avatar" "Username"}
@@ -55,16 +60,24 @@ which you can then visualize using tools like [GraphvizOnline](https://dreampuf.
 
 ## Try it out
 
-You can try this rule out by running the following command:
+You can try this rule out by running the following commands.
+
+The easiest way to try out is to run the following command (requires [`jq`](https://stedolan.github.io/jq/)):
+
+```bash
+elm-review --template SiriusStarr/elm-review-import-graph/preview --extract --report=json --rules ExtractImportGraph | jq -r '.extracts.ExtractImportGraph.onlineGraph'
+```
+
+If you want the graph directly (so you can copy and paste it on [GraphvizOnline](https://dreampuf.github.io/GraphvizOnline/) for instance), run:
+
+```bash
+elm-review --template SiriusStarr/elm-review-import-graph/preview --extract --report=json --rules ExtractImportGraph | jq -r '.extracts.ExtractImportGraph.graph'
+```
+
+If you don't have `jq` installed, then you can run the following command and manipulate the resulting JSON with the tools at your disposal.
 
 ```bash
 elm-review --template SiriusStarr/elm-review-import-graph/preview --extract --report=json --rules ExtractImportGraph
-```
-
-then access the data at `.extracts.ExtractImportGraph`. If you have [`jq`](https://stedolan.github.io/jq/) installed, you can run the following command:
-
-```bash
-elm-review --template SiriusStarr/elm-review-import-graph/preview --extract --report=json --rules ExtractImportGraph | jq -r '.extracts.ExtractImportGraph'
 ```
 
 -}
