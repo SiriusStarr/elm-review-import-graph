@@ -22,10 +22,12 @@ import Set exposing (Set)
         [ ExtractImportGraph.rule
         ]
 
-This will generate a JSON with two fields:
+This will generate JSON with two fields:
 
   - `graph` - The import graph for your project's modules
   - `onlineGraph` - A link to [GraphvizOnline](https://dreampuf.github.io/GraphvizOnline/) where you can directly view your graph (might not work if your project is too big though)
+
+If your project is too large, then the online viewer will not be able to cope. You can use the Graphviz `dot` CLI ([installation instructions](https://graphviz.org/download/)) to create images on your system in that case. See [below](#try-it-out) for instructions.
 
 The import graph will look like the one below (example for [`rtfeldman/elm-spa-example`](https://github.com/rtfeldman/elm-spa-example)).
 
@@ -72,6 +74,12 @@ If you want the graph directly (so you can copy and paste it on [GraphvizOnline]
 
 ```bash
 elm-review --template SiriusStarr/elm-review-import-graph/preview --extract --report=json --rules ExtractImportGraph | jq -r '.extracts.ExtractImportGraph.graph'
+```
+
+You can also generate an SVG image directly using the Graphviz `dot` CLI ([installation instructions](https://graphviz.org/download/)):
+
+```bash
+elm-review --template SiriusStarr/elm-review-import-graph/preview --extract --report=json --rules ExtractImportGraph | jq -r '.extracts.ExtractImportGraph.graph' | dot -Tsvg -o import-graph.svg
 ```
 
 If you don't have `jq` installed, then you can run the following command and manipulate the resulting JSON with the tools at your disposal.
