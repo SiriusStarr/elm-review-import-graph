@@ -14,6 +14,7 @@ import Json.Encode as Encode
 import Review.Project.Dependency as Dependency exposing (Dependency)
 import Review.Rule as Rule exposing (Rule)
 import Set exposing (Set)
+import Url
 
 
 {-| Extract the import graph of your project's modules.
@@ -198,20 +199,9 @@ dataExtractor projectContext =
             "digraph {\n" ++ String.join "\n" nodes ++ "\n}"
     in
     Encode.object
-        [ ( "onlineGraph", Encode.string ("https://dreampuf.github.io/GraphvizOnline/#" ++ escapeUrlCharacters graph) )
+        [ ( "onlineGraph", Encode.string ("https://dreampuf.github.io/GraphvizOnline/#" ++ Url.percentEncode graph) )
         , ( "graph", Encode.string graph )
         ]
-
-
-escapeUrlCharacters : String -> String
-escapeUrlCharacters graph =
-    graph
-        |> String.replace " " "%20"
-        |> String.replace "\"" "%22"
-        |> String.replace "{" "%7B"
-        |> String.replace "}" "%7D"
-        |> String.replace ">" "%3E"
-        |> String.replace "\n" "%0A"
 
 
 wrapNameInQuotes : ModuleName -> String
