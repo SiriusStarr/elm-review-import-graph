@@ -1,7 +1,7 @@
 # elm-review-import-graph
 
-Provides an [`elm-review`](https://package.elm-lang.org/packages/jfmengels/elm-review/latest/) rule to display out the
-import graph of your project.
+Provides an [`elm-review`](https://package.elm-lang.org/packages/jfmengels/elm-review/latest/) rule to display the
+import graph of your project (in the [DOT language](https://graphviz.org/doc/info/lang.html)).
 
 
 ## Provided rules
@@ -29,5 +29,5 @@ config =
 You can try the example configuration above out by running the following command:
 
 ```bash
-elm-review --template SiriusStarr/elm-review-import-graph/preview --extract --report=json
+elm-review --template SiriusStarr/elm-review-import-graph/preview --extract --report=json | jq -r '.extracts.ExtractImportGraph.onlineGraph'
 ```
