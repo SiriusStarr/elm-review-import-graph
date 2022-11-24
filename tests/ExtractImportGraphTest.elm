@@ -1,7 +1,7 @@
 module ExtractImportGraphTest exposing (all)
 
 import ExtractImportGraph exposing (rule)
-import Review.Project exposing (modules)
+import Json.Encode as Encode
 import Review.Test
 import Test exposing (Test, describe, test)
 
@@ -32,33 +32,14 @@ baz = 1
 """
                 ]
                     |> Review.Test.runOnModules rule
-                    |> Review.Test.expectGlobalErrors
-                        [ importGraph
-                            [ ( [ "A" ]
-                              , [ [ "B" ], [ "C" ] ]
-                              )
-                            , ( [ "B" ]
-                              , [ [ "C" ] ]
-                              )
+                    |> Review.Test.expectDataExtract
+                        (Encode.object
+                            [ ( "onlineGraph", Encode.string "https://dreampuf.github.io/GraphvizOnline/#digraph%20%7B%0A%20%20%22A%22%20-%3E%20%7B%22B%22%20%22C%22%7D%0A%20%20%22B%22%20-%3E%20%7B%22C%22%7D%0A%7D" )
+                            , ( "graph", Encode.string """digraph {
+  "A" -> {"B" "C"}
+  "B" -> {"C"}
+}""" )
                             ]
-                        ]
+                            |> Encode.encode 0
+                        )
         ]
-
-
-importGraph : List ( List String, List (List String) ) -> { message : String, details : List String }
-importGraph modules =
-    { message = "Import Graph"
-    , details =
-        "digraph {"
-            :: List.map
-                (\( moduleName, imports ) ->
-                    "\""
-                        ++ String.join "." moduleName
-                        ++ "\""
-                        ++ " -> {"
-                        ++ String.join " " (List.map (\s -> "\"" ++ String.join "." s ++ "\"") imports)
-                        ++ "}"
-                )
-                modules
-            ++ [ "}" ]
-    }

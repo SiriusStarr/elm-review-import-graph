@@ -1,11 +1,12 @@
 # elm-review-import-graph
 
-Provides [`elm-review`](https://package.elm-lang.org/packages/jfmengels/elm-review/latest/) rules to REPLACEME.
+Provides an [`elm-review`](https://package.elm-lang.org/packages/jfmengels/elm-review/latest/) rule to display the
+import graph of your project (in the [DOT language](https://graphviz.org/doc/info/lang.html)).
 
 
 ## Provided rules
 
-- [`ExtractImportGraph`](https://package.elm-lang.org/packages/SiriusStarr/elm-review-import-graph/1.0.0/ExtractImportGraph) - Reports REPLACEME.
+- [`ExtractImportGraph`](https://package.elm-lang.org/packages/SiriusStarr/elm-review-import-graph/1.0.0/ExtractImportGraph) - Extract the import graph of your project's modules.
 
 
 ## Configuration
@@ -28,5 +29,5 @@ config =
 You can try the example configuration above out by running the following command:
 
 ```bash
-elm-review --template SiriusStarr/elm-review-import-graph/example
+elm-review --template SiriusStarr/elm-review-import-graph/preview --extract --report=json | jq -r '.extracts.ExtractImportGraph.onlineGraph'
 ```
