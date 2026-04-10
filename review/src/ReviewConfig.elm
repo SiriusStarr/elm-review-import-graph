@@ -43,8 +43,8 @@ import Simplify
 config : List Rule
 config =
     [ Docs.NoMissing.rule
-        { document = everything
-        , from = allModules
+        { document = onlyExposed
+        , from = exposedModules
         }
     , Docs.ReviewLinksAndSections.rule
     , Docs.ReviewAtDocs.rule
